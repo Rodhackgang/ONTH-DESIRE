@@ -347,10 +347,12 @@
          * Vérifie qu'un numéro correspond bien au format +237 6 XX XX XX XX
          */
         function isValidCameroonNumber(number) {
-            // Pattern : +237 suivi d'un espace, puis "6", puis 4 groupes de 2 chiffres
-            const regex = /^\+237\s6\d(\s\d{2}){4}$/;
-            return regex.test(number);
-        }
+  // Accepte +237 6XXXXXXXX ou +2376XXXXXXXX (avec ou sans espace),
+  // soit au total 1 chiffre "6" + 8 chiffres = 9 chiffres après +237
+  const regex = /^\+237\s?6\d{8}$/;
+  return regex.test(number);
+}
+
 
         // Appliquer le formatage automatique lors de la saisie
         const startInput = document.getElementById('startNumber');

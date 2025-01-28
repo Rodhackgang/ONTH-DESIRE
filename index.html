@@ -1,461 +1,483 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Générateur de Numéros Camerounais</title>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        /* Variables de couleur */
-        :root {
-            --background: #f0f4f8;
-            --glass-bg: rgba(255, 255, 255, 0.25);
-            --blur: 10px;
-            --primary: #ffffff;
-            --secondary: #e0e7ff;
-            --accent: #4a90e2;
-            --text: #333333;
-            --button-bg: #4a90e2;
-            --button-hover: #357abd;
-            --button-disabled: #a0c4e8;
-            --input-bg: rgba(255, 255, 255, 0.3);
-            --border-radius: 12px;
-            --error-color: #e74c3c;
-            --success-color: #2ecc71;
-            --notification-duration: 3000ms;
-            --spinner-color: #4a90e2;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Générateur de Numéros Téléphoniques</title>
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+  <!-- Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
 
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
+  <!-- Import de la bibliothèque libphonenumber-js depuis un CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/libphonenumber-js@1.10.23/bundle/libphonenumber-max.js"></script>
 
-        .container {
-            background: var(--glass-bg);
-            backdrop-filter: blur(var(--blur));
-            border-radius: var(--border-radius);
-            padding: 30px;
-            width: 100%;
-            max-width: 500px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: var(--text);
-            position: relative;
-            overflow: hidden;
-        }
+  <style>
+    /* Variables de couleur */
+    :root {
+      --background: #f0f4f8;
+      --glass-bg: rgba(255, 255, 255, 0.25);
+      --blur: 10px;
+      --primary: #ffffff;
+      --secondary: #e0e7ff;
+      --accent: #4a90e2;
+      --text: #333333;
+      --button-bg: #4a90e2;
+      --button-hover: #357abd;
+      --button-disabled: #a0c4e8;
+      --input-bg: rgba(255, 255, 255, 0.3);
+      --border-radius: 12px;
+      --error-color: #e74c3c;
+      --success-color: #2ecc71;
+      --notification-duration: 3000ms;
+      --spinner-color: #4a90e2;
+    }
 
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.8em;
-            color: var(--accent);
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        label {
-            display: block;
-            margin-top: 15px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
 
-        input[type="text"] {
-            width: 100%;
-            padding: 12px 20px;
-            margin-top: 5px;
-            font-size: 16px;
-            border: none;
-            border-radius: var(--border-radius);
-            background: var(--input-bg);
-            color: #333;
-            outline: none;
-            transition: background 0.3s ease, border 0.3s ease;
-        }
+    .container {
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--blur));
+      border-radius: var(--border-radius);
+      padding: 30px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: var(--text);
+      position: relative;
+      overflow: hidden;
+    }
 
-        input[type="text"]::placeholder {
-            color: #666;
-        }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 1.8em;
+      color: var(--accent);
+    }
 
-        input[type="text"]:focus {
-            background: rgba(255, 255, 255, 0.4);
-            border: 1px solid var(--accent);
-        }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
 
-        button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 20px;
-            font-size: 16px;
-            border: none;
-            border-radius: var(--border-radius);
-            background-color: var(--button-bg);
-            color: var(--primary);
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s, opacity 0.3s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    select,
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 20px;
+      margin-top: 5px;
+      font-size: 16px;
+      border: none;
+      border-radius: var(--border-radius);
+      background: var(--input-bg);
+      color: #333;
+      outline: none;
+      transition: background 0.3s ease, border 0.3s ease;
+      appearance: none; /* pour enlever la flèche par défaut sur certains navigateurs */
+    }
 
-        button:hover:not(:disabled) {
-            background-color: var(--button-hover);
-            transform: translateY(-2px);
-        }
+    input[type="text"]::placeholder {
+      color: #666;
+    }
 
-        button:active:not(:disabled) {
-            transform: translateY(0);
-        }
+    input[type="text"]:focus,
+    select:focus {
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px solid var(--accent);
+    }
 
-        button:disabled {
-            background-color: var(--button-disabled);
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: var(--border-radius);
+      background-color: var(--button-bg);
+      color: var(--primary);
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s, opacity 0.3s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-        .btn-export {
-            background-color: #2ecc71;
-        }
+    button:hover:not(:disabled) {
+      background-color: var(--button-hover);
+      transform: translateY(-2px);
+    }
 
-        .btn-export:hover:not(:disabled) {
-            background-color: #27ae60;
-        }
+    button:active:not(:disabled) {
+      transform: translateY(0);
+    }
 
-        .message {
-            color: var(--error-color);
-            margin-top: 10px;
-            text-align: center;
-            min-height: 24px;
-        }
+    button:disabled {
+      background-color: var(--button-disabled);
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
 
-        textarea {
-            width: 100%;
-            height: 200px;
-            margin-top: 20px;
-            padding: 15px;
-            font-size: 14px;
-            border: none;
-            border-radius: var(--border-radius);
-            background: var(--input-bg);
-            color: #333;
-            resize: none;
-            outline: none;
-            transition: background 0.3s ease, border 0.3s ease;
-        }
+    .btn-export {
+      background-color: #2ecc71;
+    }
 
-        textarea::placeholder {
-            color: #666;
-        }
+    .btn-export:hover:not(:disabled) {
+      background-color: #27ae60;
+    }
 
-        textarea:focus {
-            background: rgba(255, 255, 255, 0.4);
-            border: 1px solid var(--accent);
-        }
+    .message {
+      color: var(--error-color);
+      margin-top: 10px;
+      text-align: center;
+      min-height: 24px;
+    }
 
-        /* Notification Styles */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(var(--blur));
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: var(--border-radius);
-            padding: 15px 20px;
-            color: #fff;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-            display: flex;
-            align-items: center;
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-            z-index: 1000;
-        }
+    textarea {
+      width: 100%;
+      height: 200px;
+      margin-top: 20px;
+      padding: 15px;
+      font-size: 14px;
+      border: none;
+      border-radius: var(--border-radius);
+      background: var(--input-bg);
+      color: #333;
+      resize: none;
+      outline: none;
+      transition: background 0.3s ease, border 0.3s ease;
+    }
 
-        .notification.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    textarea::placeholder {
+      color: #666;
+    }
 
-        .notification.error {
-            background-color: rgba(231, 76, 60, 0.9);
-            border-left: 5px solid #e74c3c;
-        }
+    textarea:focus {
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px solid var(--accent);
+    }
 
-        .notification.success {
-            background-color: rgba(46, 204, 113, 0.9);
-            border-left: 5px solid #2ecc71;
-        }
+    /* Notification Styles */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--blur));
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: var(--border-radius);
+      padding: 15px 20px;
+      color: #fff;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+      display: flex;
+      align-items: center;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      z-index: 1000;
+    }
 
-        .notification .close-btn {
-            margin-left: auto;
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 16px;
-            cursor: pointer;
-        }
+    .notification.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
 
-        /* Spinner Styles */
-        .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left-color: var(--spinner-color);
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            margin-left: 10px;
-        }
+    .notification.error {
+      background-color: rgba(231, 76, 60, 0.9);
+      border-left: 5px solid #e74c3c;
+    }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+    .notification.success {
+      background-color: rgba(46, 204, 113, 0.9);
+      border-left: 5px solid #2ecc71;
+    }
 
-        /* Réactivité */
-        @media (max-width: 600px) {
-            .container {
-                padding: 20px;
-            }
+    .notification .close-btn {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
 
-            h1 {
-                font-size: 1.5em;
-            }
+    /* Spinner Styles */
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-left-color: var(--spinner-color);
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+    }
 
-            input[type="text"], button, textarea {
-                font-size: 14px;
-                padding: 10px;
-            }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
 
-            .notification {
-                width: 90%;
-                right: 5%;
-            }
-        }
-    </style>
+    /* Réactivité */
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 1.5em;
+      }
+
+      input[type="text"],
+      select,
+      button,
+      textarea {
+        font-size: 14px;
+        padding: 10px;
+      }
+
+      .notification {
+        width: 90%;
+        right: 5%;
+      }
+    }
+  </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Générateur de Numéros Camerounais</h1>
+  <div class="container">
+    <h1>Générateur de Numéros Téléphoniques</h1>
 
-        <label for="startNumber">Numéro de début :</label>
-        <input type="text" id="startNumber" placeholder="+237 6 00 00 00 00" maxlength="17">
+    <!-- Sélection du pays -->
+    <label for="countrySelect">Pays :</label>
+    <select id="countrySelect">
+      <option value="FR" selected>France (+33)</option>
+      <option value="BE">Belgique (+32)</option>
+      <option value="CH">Suisse (+41)</option>
+      <option value="CA">Canada (+1)</option>
+      <option value="US">États-Unis (+1)</option>
+      <!-- Ajoutez ici d'autres pays si nécessaire -->
+    </select>
 
-        <label for="endNumber">Numéro de fin :</label>
-        <input type="text" id="endNumber" placeholder="+237 6 99 99 99 99" maxlength="17">
+    <label for="startNumber">Numéro de début :</label>
+    <input type="text" id="startNumber" placeholder="Ex: +33 6 00 00 00 00"/>
 
-        <button id="generateBtn">Générer les numéros</button>
-        <button id="exportBtn" class="btn-export">Exporter en Excel</button>
+    <label for="endNumber">Numéro de fin :</label>
+    <input type="text" id="endNumber" placeholder="Ex: +33 6 99 99 99 99"/>
 
-        <p class="message" id="message"></p>
+    <button id="generateBtn">Générer les numéros</button>
+    <button id="exportBtn" class="btn-export">Exporter en CSV</button>
 
-        <textarea id="numberList" placeholder="Les numéros générés apparaîtront ici..." readonly></textarea>
-    </div>
+    <p class="message" id="message"></p>
 
-    <!-- Notification Element -->
-    <div id="notification" class="notification">
-        <span id="notificationMessage"></span>
-        <button class="close-btn" id="closeNotification">&times;</button>
-    </div>
+    <textarea
+      id="numberList"
+      placeholder="Les numéros générés apparaîtront ici..."
+      readonly
+    ></textarea>
+  </div>
 
-    <script>
-        // Fonction pour afficher les notifications
-        function showNotification(message, type = 'error') {
-            const notification = document.getElementById('notification');
-            const notificationMessage = document.getElementById('notificationMessage');
+  <!-- Notification Element -->
+  <div id="notification" class="notification">
+    <span id="notificationMessage"></span>
+    <button class="close-btn" id="closeNotification">&times;</button>
+  </div>
 
-            notificationMessage.textContent = message;
-            notification.classList.remove('error', 'success');
-            notification.classList.add(type, 'show');
+  <script>
+    const {
+      parsePhoneNumberFromString
+    } = window.libphonenumber; // Récupération de la fonction depuis la lib
 
-            // Auto-hide après un certain temps
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
+    // Fonction pour afficher les notifications
+    function showNotification(message, type = 'error') {
+      const notification = document.getElementById('notification');
+      const notificationMessage = document.getElementById('notificationMessage');
 
-            // Option pour fermer manuellement
-            const closeBtn = document.getElementById('closeNotification');
-            closeBtn.onclick = () => {
-                notification.classList.remove('show');
-            };
+      notificationMessage.textContent = message;
+      notification.classList.remove('error', 'success');
+      notification.classList.add(type, 'show');
+
+      // Auto-hide après un certain temps
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+
+      // Option pour fermer manuellement
+      const closeBtn = document.getElementById('closeNotification');
+      closeBtn.onclick = () => {
+        notification.classList.remove('show');
+      };
+    }
+
+    // Fonction de validation utilisant libphonenumber
+    // On s'assure que le parsing ne jette pas d'erreur et que le numéro est valide
+    function isValidNumber(phoneStr, countryCode) {
+      try {
+        const parsedNumber = parsePhoneNumberFromString(phoneStr, countryCode);
+        return parsedNumber && parsedNumber.isValid();
+      } catch (error) {
+        return false;
+      }
+    }
+
+    // Récupère la partie "numérique" exploitable pour l'incrémentation (nationalNumber)
+    function getNumericValue(phoneStr, countryCode) {
+      try {
+        const parsedNumber = parsePhoneNumberFromString(phoneStr, countryCode);
+        if (parsedNumber && parsedNumber.isValid()) {
+          // On retourne ici la nationalNumber sous forme d'entier (si possible)
+          // Attention : pour certains pays, la nationalNumber peut commencer par 0
+          // ou contenir moins de chiffres ; on s'assure de ne garder que des chiffres.
+          return parseInt(parsedNumber.nationalNumber, 10);
+        }
+      } catch (error) {
+        return NaN;
+      }
+      return NaN;
+    }
+
+    // Reconstruit un numéro formaté depuis une valeur numérique et un pays
+    // On suppose ici que l'on récupère la longueur de la nationalNumber pour faire un padStart
+    function buildPhoneNumberFromNumeric(numericValue, baseNumber, countryCode) {
+      const baseParsed = parsePhoneNumberFromString(baseNumber, countryCode);
+      if (!baseParsed || !baseParsed.isValid()) {
+        return '';
+      }
+
+      // Longueur de la nationalNumber originale (pour padStart)
+      const length = baseParsed.nationalNumber.length;
+      const newNationalNumber = numericValue.toString().padStart(length, '0');
+
+      // Reconstruire le numéro de téléphone (format international)
+      // On crée un nouvel objet phoneNumber dans libphonenumber,
+      // mais la lib ne fournit pas de méthode directe pour "reconstruire" par simple affectation.
+      // On peut contourner cela en :
+      // 1) créant la chaîne complète (ex: +33 + newNationalNumber)
+      // 2) ré-analysant via parsePhoneNumberFromString
+      // puis on formate au format international.
+      const newFullStr = `+${baseParsed.countryCallingCode}${newNationalNumber}`;
+      const parsedAgain = parsePhoneNumberFromString(newFullStr);
+      return parsedAgain ? parsedAgain.formatInternational() : '';
+    }
+
+    // Fonction pour désactiver/activer les éléments (inputs, boutons)
+    function setElementsDisabled(disabled) {
+      document.getElementById('countrySelect').disabled = disabled;
+      document.getElementById('startNumber').disabled = disabled;
+      document.getElementById('endNumber').disabled = disabled;
+      document.getElementById('generateBtn').disabled = disabled;
+      document.getElementById('exportBtn').disabled = disabled;
+      const generateBtn = document.getElementById('generateBtn');
+      if (disabled) {
+        generateBtn.innerHTML = `Génération en cours <div class="spinner"></div>`;
+      } else {
+        generateBtn.innerHTML = `Générer les numéros`;
+      }
+    }
+
+    // Gestion du clic sur le bouton "Générer"
+    document.getElementById('generateBtn').addEventListener('click', function () {
+      const countryCode = document.getElementById('countrySelect').value;
+      const startInputValue = document.getElementById('startNumber').value.trim();
+      const endInputValue = document.getElementById('endNumber').value.trim();
+      const numberList = document.getElementById('numberList');
+      const msg = document.getElementById('message');
+
+      numberList.value = '';
+      msg.textContent = '';
+
+      // Validation des numéros
+      if (!isValidNumber(startInputValue, countryCode) || !isValidNumber(endInputValue, countryCode)) {
+        showNotification('Veuillez entrer des numéros valides pour le pays sélectionné.', 'error');
+        return;
+      }
+
+      // Récupération des parties numériques (nationalNumber)
+      const startNum = getNumericValue(startInputValue, countryCode);
+      const endNum = getNumericValue(endInputValue, countryCode);
+
+      if (isNaN(startNum) || isNaN(endNum)) {
+        showNotification('Impossible de parser les numéros pour ce pays.', 'error');
+        return;
+      }
+
+      if (startNum > endNum) {
+        showNotification('Le numéro de début doit être inférieur ou égal au numéro de fin.', 'error');
+        return;
+      }
+
+      // Limite (pour éviter trop de générations)
+      const maxRange = 1000;
+      if ((endNum - startNum) > maxRange) {
+        showNotification(`La plage est trop grande. Maximum ${maxRange} numéros.`, 'error');
+        return;
+      }
+
+      // Désactiver les éléments et afficher le spinner
+      setElementsDisabled(true);
+
+      // Simulation d'un temps de génération
+      setTimeout(() => {
+        const results = [];
+        for (let i = startNum; i <= endNum; i++) {
+          const formatted = buildPhoneNumberFromNumeric(i, startInputValue, countryCode);
+          if (formatted) {
+            results.push(formatted);
+          }
         }
 
-        // Fonction de formatage automatique
-        function formatFrenchNumber(value) {
-            // Supprimer tous les caractères non numériques sauf le "+"
-            let formatted = value.replace(/[^+\d]/g, '');
+        numberList.value = results.join('\n');
+        showNotification('Numéros générés avec succès !', 'success');
 
-            // Si le numéro commence par "+33", supprimer le zéro suivant s'il existe
-            if (formatted.startsWith('+33')) {
-                if (formatted.charAt(3) === '0') {
-                    formatted = '+237' + formatted.slice(4);
-                }
-            }
+        // Réactiver
+        setElementsDisabled(false);
+      }, 1000);
+    });
 
-            // Supprimer le "+" pour traiter les chiffres
-            let numbers = formatted.replace(/\D/g, '');
+    // Gestion du clic sur le bouton "Exporter en CSV"
+    document.getElementById('exportBtn').addEventListener('click', function () {
+      const text = document.getElementById('numberList').value;
+      if (!text) {
+        showNotification("Veuillez d'abord générer des numéros.", 'error');
+        return;
+      }
 
-            // Si le numéro commence par "33", l'ajouter au format "+33 "
-            if (numbers.startsWith('237')) {
-                numbers = numbers.substring(2);
-                formatted = '+237 ';
-            } else if (numbers.startsWith('0')) {
-                numbers = numbers.substring(1);
-                formatted = '+237 ';
-            } else if (formatted.startsWith('+')) {
-                formatted = '+237 ';
-            } else {
-                // Si le numéro ne commence pas par "+33" ou "0", ajouter "+33 "
-                formatted = '+237 ';
-            }
+      setElementsDisabled(true);
 
-            // Construire le numéro formaté
-            if (numbers.length > 0) {
-                formatted += numbers.substring(0, 1);
-            }
-            for (let i = 1; i < numbers.length; i += 2) {
-                formatted += ' ' + numbers.substring(i, i + 2);
-            }
+      // Simulation d'un temps d'export
+      setTimeout(() => {
+        const data = new Blob([text], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(data);
 
-            return formatted.trim();
-        }
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'numeros.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
 
-        // Appliquer le formatage automatique lors de la saisie
-        const startInput = document.getElementById('startNumber');
-        const endInput = document.getElementById('endNumber');
-
-        function handleInput(event) {
-            const cursorPosition = event.target.selectionStart;
-            const originalLength = event.target.value.length;
-
-            event.target.value = formatFrenchNumber(event.target.value);
-
-            const newLength = event.target.value.length;
-            event.target.selectionEnd = cursorPosition + (newLength - originalLength);
-        }
-
-        startInput.addEventListener('input', handleInput);
-        endInput.addEventListener('input', handleInput);
-
-        // Fonction pour désactiver/activer les éléments
-        function setElementsDisabled(disabled) {
-            startInput.disabled = disabled;
-            endInput.disabled = disabled;
-            document.getElementById('generateBtn').disabled = disabled;
-            document.getElementById('exportBtn').disabled = disabled;
-            if (disabled) {
-                // Ajouter un spinner au bouton de génération
-                const generateBtn = document.getElementById('generateBtn');
-                generateBtn.innerHTML = `Génération en cours <div class="spinner"></div>`;
-            } else {
-                // Remettre le texte original
-                const generateBtn = document.getElementById('generateBtn');
-                generateBtn.innerHTML = `Générer les numéros`;
-            }
-        }
-
-        document.getElementById('generateBtn').addEventListener('click', function() {
-            const startInputValue = startInput.value.trim();
-            const endInputValue = endInput.value.trim();
-            const numberList = document.getElementById('numberList');
-
-            numberList.value = '';
-
-            // Fonction de validation des numéros français
-            function isValidFrenchNumber(number) {
-                const regex = /^\+33\s[1-9](?:\s\d{2}){4}$/;
-                return regex.test(number);
-            }
-
-            if (!isValidFrenchNumber(startInputValue) || !isValidFrenchNumber(endInputValue)) {
-                showNotification('Veuillez entrer des numéros français valides au format +237 X XX XX XX XX.', 'error');
-                return;
-            }
-
-            // Extraction des 9 derniers chiffres pour l'incrémentation
-            const startNumbers = startInputValue.replace(/\D/g, '').slice(-9);
-            const endNumbers = endInputValue.replace(/\D/g, '').slice(-9);
-
-            const start = parseInt(startNumbers, 10);
-            const end = parseInt(endNumbers, 10);
-
-            if (isNaN(start) || isNaN(end)) {
-                showNotification('Les numéros entrés ne sont pas valides.', 'error');
-                return;
-            }
-
-            if (start > end) {
-                showNotification('Le numéro de début doit être inférieur ou égal au numéro de fin.', 'error');
-                return;
-            }
-
-            const maxRange = 1000; // Limite pour éviter les problèmes de performance
-            if ((end - start) > maxRange) {
-                showNotification(`La plage est trop grande. Veuillez sélectionner une plage de moins de ${maxRange} numéros.`, 'error');
-                return;
-            }
-
-            // Désactiver les éléments et afficher le spinner
-            setElementsDisabled(true);
-
-            // Simuler un délai de génération (par exemple, 1 seconde)
-            setTimeout(() => {
-                const numbers = [];
-                for (let i = start; i <= end; i++) {
-                    const numberStr = i.toString().padStart(9, '0'); // 9 chiffres
-                    const formattedNumber = `+33 ${numberStr.slice(0,1)} ${numberStr.slice(1,3)} ${numberStr.slice(3,5)} ${numberStr.slice(5,7)} ${numberStr.slice(7,9)}`;
-                    numbers.push(formattedNumber);
-                }
-
-                numberList.value = numbers.join('\n');
-                showNotification('Numéros générés avec succès !', 'success');
-
-                // Réactiver les éléments
-                setElementsDisabled(false);
-            }, 1000); // 1 seconde de délai pour simuler le traitement
-        });
-
-        document.getElementById('exportBtn').addEventListener('click', function() {
-            const text = document.getElementById('numberList').value;
-            if (!text) {
-                showNotification('Veuillez générer des numéros avant d\'exporter.', 'error');
-                return;
-            }
-
-            // Désactiver les éléments et afficher le spinner
-            setElementsDisabled(true);
-
-            // Simuler un délai d'exportation (par exemple, 1 seconde)
-            setTimeout(() => {
-                const data = new Blob([text], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(data);
-
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'numeros.csv';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-
-                showNotification('Exportation réussie !', 'success');
-
-                // Réactiver les éléments
-                setElementsDisabled(false);
-            }, 1000); // 1 seconde de délai pour simuler le traitement
-        });
-    </script>
-
+        showNotification('Exportation réussie !', 'success');
+        setElementsDisabled(false);
+      }, 1000);
+    });
+  </script>
 </body>
 </html>

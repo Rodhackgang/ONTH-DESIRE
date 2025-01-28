@@ -284,209 +284,113 @@
     </div>
 
     <script>
-        // Fonction pour afficher les notifications
-        function showNotification(message, type = 'error') {
-            const notification = document.getElementById('notification');
-            const notificationMessage = document.getElementById('notificationMessage');
+     function showNotification(message, type='error') {
+    const notif = document.getElementById('notification');
+    const notifMsg = document.getElementById('notificationMessage');
 
-            notificationMessage.textContent = message;
-            notification.classList.remove('error', 'success');
-            notification.classList.add(type, 'show');
+    notifMsg.textContent = message;
+    notif.classList.remove('error','success','show');
+    if (type === 'success') notif.classList.add('success');
+    else notif.classList.remove('success');
+    notif.classList.add('show');
 
-            // Auto-hide après un certain temps
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
+    setTimeout(() => { notif.classList.remove('show'); }, 3000);
+  }
 
-            // Option pour fermer manuellement
-            const closeBtn = document.getElementById('closeNotification');
-            closeBtn.onclick = () => {
-                notification.classList.remove('show');
-            };
-        }
+  // Validation plus souple : +237, option espace, 6, et 8 chiffres
+  function isValidCameroonNumber(number) {
+    const regex = /^\+237\s?6\d{8}$/;
+    return regex.test(number);
+  }
 
-        /**
-         * Formatage automatique d'un numéro saisi en +237 6 XX XX XX XX
-         */
-        function formatCameroonNumber(value) {
-            // On enlève tout caractère non numérique sauf le "+"
-            let raw = value.replace(/[^+\d]/g, '');
+  // Fonction pour transformer "672375157" en format +237 6 72 37 51 57
+  function formatNumberForList(nineDigits) {
+    // nineDigits doit faire 9 caractères (ex: "672375157")
+    let formatted = '+237 ' + nineDigits.charAt(0); // => +237 6
+    let index = 1;
+    while (index < nineDigits.length) {
+      formatted += ' ' + nineDigits.slice(index, index + 2);
+      index += 2;
+    }
+    return formatted.trim();
+  }
 
-            // Si ça commence par +237, on retire ce préfixe pour traiter la suite
-            if (raw.startsWith('+237')) {
-                raw = raw.slice(4); // on enlève "+237"
-            }
+  // Fonction principale de génération
+  function generateNumbers() {
+    const startValue = document.getElementById('startNumber').value.trim();
+    const endValue = document.getElementById('endNumber').value.trim();
+    const numberList = document.getElementById('numberList');
+    const msg = document.getElementById('message');
 
-            // On ne garde que les chiffres (en ignorant le + qu'on vient de retirer)
-            raw = raw.replace(/\D/g, '');
+    numberList.value = '';
+    msg.textContent = '';
 
-            // Idéalement, le premier chiffre doit être un "6" (pour un mobile au Cameroun)
-            if (!raw.startsWith('6')) {
-                raw = '6' + raw;
-            }
+    // Vérifier les 2 inputs
+    if (!isValidCameroonNumber(startValue) || !isValidCameroonNumber(endValue)) {
+      showNotification('Numéros invalides ! Format : +237 6XXXXXXXX', 'error');
+      msg.textContent = 'Exemple: +237 672375157';
+      return;
+    }
 
-            // On limite à 9 chiffres au total (ex: 6XXXXXXXX)
-            raw = raw.slice(0, 9);
+    // Extraire les 9 chiffres après +237 (ex: 672375157)
+    const start9 = startValue.replace(/\D/g, '').slice(-9);
+    const end9   = endValue.replace(/\D/g, '').slice(-9);
 
-            // Construction du format final : +237 6 XX XX XX XX
-            let formatted = '+237';
-            if (raw.length > 0) {
-                formatted += ' ' + raw.charAt(0);
-            }
-            
-            let index = 1;
-            while (index < raw.length) {
-                formatted += ' ' + raw.slice(index, index + 2);
-                index += 2;
-            }
+    const start = parseInt(start9, 10);
+    const end   = parseInt(end9,   10);
 
-            return formatted.trim();
-        }
+    if (isNaN(start) || isNaN(end)) {
+      showNotification('Problème de conversion en nombres.', 'error');
+      return;
+    }
+    if (start > end) {
+      showNotification('Le numéro de début doit être <= numéro de fin', 'error');
+      return;
+    }
 
-        /**
-         * Vérifie qu'un numéro correspond bien au format +237 6 XX XX XX XX
-         */
-        function isValidCameroonNumber(number) {
-  // Accepte +237 6XXXXXXXX ou +2376XXXXXXXX (avec ou sans espace),
-  // soit au total 1 chiffre "6" + 8 chiffres = 9 chiffres après +237
-  const regex = /^\+237\s?6\d{8}$/;
-  return regex.test(number);
-}
+    // Limite de 1000 numéros
+    const maxRange = 1000;
+    if ((end - start) > maxRange) {
+      showNotification(`La plage dépasse ${maxRange} numéros !`, 'error');
+      return;
+    }
 
+    // Génération
+    const results = [];
+    for (let i = start; i <= end; i++) {
+      // i => ex: 672375157 (nombre)
+      // Convertir en string 9 chiffres ex: "672375157"
+      let currentStr = i.toString().padStart(9, '0');
+      // On formatte style +237 6 XX XX XX XX
+      results.push(formatNumberForList(currentStr));
+    }
 
-        // Appliquer le formatage automatique lors de la saisie
-        const startInput = document.getElementById('startNumber');
-        const endInput = document.getElementById('endNumber');
+    numberList.value = results.join('\n');
+    showNotification('Génération réussie !', 'success');
+  }
 
-        function handleInput(event) {
-            const cursorPosition = event.target.selectionStart;
-            const originalLength = event.target.value.length;
+  // Export CSV
+  function exportCSV() {
+    const text = document.getElementById('numberList').value;
+    if (!text) {
+      showNotification('Aucun numéro à exporter.', 'error');
+      return;
+    }
+    const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'numeros_cameroun.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showNotification('Exportation réussie !', 'success');
+  }
 
-            event.target.value = formatCameroonNumber(event.target.value);
-
-            const newLength = event.target.value.length;
-            // On essaie de repositionner le curseur au mieux
-            event.target.selectionEnd = cursorPosition + (newLength - originalLength);
-        }
-
-        startInput.addEventListener('input', handleInput);
-        endInput.addEventListener('input', handleInput);
-
-        /**
-         * Désactiver/réactiver les champs et boutons
-         */
-        function setElementsDisabled(disabled) {
-            startInput.disabled = disabled;
-            endInput.disabled = disabled;
-            document.getElementById('generateBtn').disabled = disabled;
-            document.getElementById('exportBtn').disabled = disabled;
-
-            const generateBtn = document.getElementById('generateBtn');
-            if (disabled) {
-                generateBtn.innerHTML = `Génération en cours <div class="spinner"></div>`;
-            } else {
-                generateBtn.innerHTML = `Générer les numéros`;
-            }
-        }
-
-        /**
-         * Gestion du clic sur "Générer les numéros"
-         */
-        document.getElementById('generateBtn').addEventListener('click', function() {
-            const startValue = startInput.value.trim();
-            const endValue = endInput.value.trim();
-            const numberList = document.getElementById('numberList');
-
-            numberList.value = '';
-
-            if (!isValidCameroonNumber(startValue) || !isValidCameroonNumber(endValue)) {
-                showNotification('Veuillez entrer des numéros camerounais valides au format +237 6 XX XX XX XX.', 'error');
-                return;
-            }
-
-            // Extraire les 9 derniers chiffres (ex: 6XXXXXXXX)
-            const startDigits = startValue.replace(/\D/g, '').slice(-9);
-            const endDigits = endValue.replace(/\D/g, '').slice(-9);
-
-            const start = parseInt(startDigits, 10);
-            const end = parseInt(endDigits, 10);
-
-            if (isNaN(start) || isNaN(end)) {
-                showNotification('Les numéros entrés ne sont pas valides.', 'error');
-                return;
-            }
-
-            if (start > end) {
-                showNotification('Le numéro de début doit être inférieur ou égal au numéro de fin.', 'error');
-                return;
-            }
-
-            // Limite de génération pour éviter les blocages
-            const maxRange = 1000;
-            if ((end - start) > maxRange) {
-                showNotification(`La plage est trop grande. Veuillez sélectionner une plage de moins de ${maxRange} numéros.`, 'error');
-                return;
-            }
-
-            // Désactiver et afficher le spinner
-            setElementsDisabled(true);
-
-            // Simuler un délai de traitement (1 seconde)
-            setTimeout(() => {
-                const numbers = [];
-                for (let i = start; i <= end; i++) {
-                    // i est un nombre à 9 chiffres potentiellement (6XXXXXXXX)
-                    // On s'assure de compléter avec des zéros à gauche si nécessaire
-                    let numStr = i.toString().padStart(9, '0');
-
-                    // format +237 6 XX XX XX XX
-                    // Le premier caractère est déjà '6', puis 8 autres
-                    let formatted = '+237 ' + numStr.charAt(0);
-                    let index = 1;
-                    while (index < numStr.length) {
-                        formatted += ' ' + numStr.slice(index, index + 2);
-                        index += 2;
-                    }
-
-                    numbers.push(formatted.trim());
-                }
-
-                numberList.value = numbers.join('\n');
-                showNotification('Numéros générés avec succès !', 'success');
-
-                setElementsDisabled(false);
-            }, 1000);
-        });
-
-        /**
-         * Gestion du clic sur "Exporter en Excel" (ou CSV)
-         */
-        document.getElementById('exportBtn').addEventListener('click', function() {
-            const text = document.getElementById('numberList').value;
-            if (!text) {
-                showNotification('Veuillez générer des numéros avant d\'exporter.', 'error');
-                return;
-            }
-
-            setElementsDisabled(true);
-
-            setTimeout(() => {
-                // Créer un fichier CSV (texte) à partir des numéros
-                const data = new Blob([text], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(data);
-
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'numeros_cameroun.csv';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-
-                showNotification('Exportation réussie !', 'success');
-                setElementsDisabled(false);
-            }, 1000);
-        });
+  // Gestion des boutons
+  document.getElementById('generateBtn').addEventListener('click', generateNumbers);
+  document.getElementById('exportBtn').addEventListener('click', exportCSV);
     </script>
 </body>
 </html>
